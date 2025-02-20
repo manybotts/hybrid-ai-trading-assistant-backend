@@ -77,39 +77,35 @@ These steps are for running the backend *locally* for development and testing.  
 
 ## Training the Model
 To train the model, you can run the `ai_model.py` script. First you will need to obtain historical data. You can obtain this data from your Deriv account, or by utilizing the `derived_api.py` to call `get_historical_digits`. You can run the python script as is and modify the hyperparameters at the top of the file. Be sure to
-**Part 2: `README.md` (Deployment to Railway)**
-
-```markdown
 ## Deployment to Railway
 
-This section describes how to deploy the backend to Railway.  We'll use Railway's one-click deploy feature for simplicity and to avoid storing secrets in the repository.
+This section describes how to deploy the backend to Railway. We'll use Railway's one-click deploy feature and a `railway.json` file for a streamlined deployment.
 
 1.  **Create a Railway Account:** If you don't already have one, sign up for a free Railway account at [https://railway.app](https://railway.app).
 
-2.  **Create a New Project:**  In your Railway dashboard, create a new project. Choose "Empty Project".
+2.  **One-Click Deploy:** Click the button below to deploy the backend to Railway:
 
-3.  **Create a New Service:** In your new project, add a new service, and select "GitHub Repo".
+    [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https%3A%2F%2Fgithub.com%2Fmanybotts%2Fhybrid-ai-trading-assistant-backend&envs=DERIVED_API_KEY%2CDERIVED_APP_ID&optionalEnvs=CALLS_PER_MINUTE%2CCALLS_PER_SECOND&DERIVED_API_KEY_DESCRIPTION=Your+Deriv.com+API+token&DERIVED_APP_ID_DESCRIPTION=Your+Deriv.com+App+ID&CALLS_PER_MINUTE_DESCRIPTION=Optional%3A+Override+default+calls+per+minute&CALLS_PER_SECOND_DESCRIPTION=Optional%3A+Override+default+calls+per+second)
 
-4.  **Connect to GitHub:**  Connect your Railway project to your `hybrid-ai-trading-assistant-backend` GitHub repository.  You'll need to grant Railway access to your repository.
+    *   This button will take you to Railway and guide you through the deployment process.  It will automatically:
+        *   Fork the `hybrid-ai-trading-assistant-backend` repository into your Railway account.
+        *   Prompt you to enter the required environment variables (see below).
+        *   Build and deploy the application.
 
-5.  **Configure Environment Variables:**
-    *   Go to the "Variables" tab in your Railway service settings.
-    *   Add the following variables:
-        *   `DERIVED_API_KEY`:  Your Deriv.com API token (e.g., `abcdefg1234567`).  **This is critical for security.  Do *not* skip this step.**
-        *   `DERIVED_APP_ID`: Your Deriv.com App ID (e.g., `12345`).  **This is critical. Do *not* skip this step.**
-        *   `CALLS_PER_MINUTE` (Optional): Override the dynamically fetched calls/minute.
-        *   `CALLS_PER_SECOND` (Optional): Override the dynamically fetched calls/second.
+3.  **Environment Variables (REQUIRED):**
 
-6.  **Configure Build and Start Commands:**
-      * Go to "Settings".
-      * Under "Build", you might not need a build command since requirements.txt is present, Railway should automatically use pip.  If it *doesn't* automatically detect it, set the **Build Command** to: `pip install -r requirements.txt`
-      * Under "Deploy", set the **Start Command** to: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+    During the one-click deployment (or manually if you prefer), you *must* set the following environment variables in your Railway project settings:
 
-7.  **Deploy:** Railway should automatically deploy your application whenever you push changes to your `main` branch on GitHub.  You can also manually trigger a deployment from the Railway dashboard.
+    *   `DERIVED_API_KEY`: Your Deriv.com API token (e.g., `abcdefg1234567`).  **This is critical for security. Do *not* skip this step.**
+    *   `DERIVED_APP_ID`: Your Deriv.com App ID (e.g., `12345`).  **This is critical. Do *not* skip this step.**
+    *   `CALLS_PER_MINUTE` (Optional): Override the dynamically fetched calls per minute.
+    *   `CALLS_PER_SECOND` (Optional): Override the dynamically fetched calls per second.
+    *    `PORT` (Optional): You can often leave it as Railway's default.
 
-8. **Get your App's URL:** Once deployed, Railway will provide you with a public URL for your backend service.  You'll need this URL for your frontend application. You can find the url under the "Settings" tab, under "Domains".
+4. **Build and Start Command**
+    * Go to "Settings".
+    * Under "Build", you might not need a build command since requirements.txt is present, Railway should automatically use pip. If it *doesn't* automatically detect it, set the **Build Command** to: `pip install -r requirements.txt`
+    * Under "Deploy", set the **Start Command** to: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5.  **Get Your App's URL:** Once deployed, Railway will provide you with a public URL for your backend service. You'll need this URL for your frontend application.  Find this in the "Settings" tab under "Domains".
 
-## One-Click Deploy Button (Optional)
-Include this button at the top of your readme:
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/manybotts/hybrid-ai-trading-assistant-backend)
+---
