@@ -9,8 +9,8 @@ from ratelimit import limits, RateLimitException, sleep_and_retry
 DERIV_WEBSOCKET_URL = "wss://ws.binaryws.com/websockets/v3"
 
 # --- API Credentials and Rate Limits (HARDCODED DEFAULTS - MUST BE REPLACED) ---
-API_KEY = os.getenv("DERIVED_API_KEY", "YOUR_DEFAULT_API_KEY")  # Default, MUST be overridden
-APP_ID = os.getenv("DERIVED_APP_ID", "YOUR_DEFAULT_APP_ID")    # Default, MUST be overridden
+API_KEY = os.getenv("DERIVED_API_KEY", "YOUR_DEFAULT_API_KEY")  # MUST be overridden
+APP_ID = os.getenv("DERIVED_APP_ID", "YOUR_DEFAULT_APP_ID")    # MUST be overridden
 CALLS_PER_MINUTE = int(os.getenv("CALLS_PER_MINUTE", 60))       # Default, can be overridden
 CALLS_PER_SECOND = int(os.getenv("CALLS_PER_SECOND", 1))        # Default, can be overridden
 
@@ -81,8 +81,63 @@ async def get_historical_digits(symbol="R_100", count=1000, end="latest", start=
         print(f"Error fetching historical data: {e}")
         return []
 
-async def subscribe_to_ticks(symbol="R_100"):
-    """Subscribes to real-time tick stream for a symbol."""
+async def get_historical_candles(symbol="R_75", count=1000, end="latest", start=1, granularity=60):
+    """Fetches historical OHLC candle data from Deriv.
+
+    Args:
+        symbol (str): The market symbol (e.g., "R_75").
+        count (int): The number of candles to retrieve.
+        end (str): "latest" or epoch time.
+        start (int): Epoch time.
+        granularity (int): Candle size in seconds (60, 120, 180, etc.).
+                           60=1minute, 3600=1hour, 86400=1day
+
+    Returns:
+        list: A list of dictionaries, each representing a candle.  Empty list on error.
+    """
+    if not API_KEY or not APP_ID:
+        raise ValueError("API_KEY and APP_ID must be set.")
+    uri = f"{DERIV_WEBSOCKET_URL}?app_id={APP_ID}"
+    try:
+        async with websockets.connect(uri) as websocket:
+            auth_request = json.dumps({"authorize": API_KEY})
+            await call_api_per_minute(websocket, auth_request)
+            candles_request = json.dumps({
+                "ticks_history": symbol,
+                "start": start,
+                "end": end,
+                "style": "candles",
+                "count": count,
+                "granularity": granularity
+            })
+            await call_api_per_second(websocket, candles_request)
+            candles_response = await call_api_per_second(websocket, candles_request)
+            candles_data = json.loads(candles_response)
+
+            if 'candles' in candles_data:
+                candles = []
+                for candle in candles_data['candles']:
+                    candles.append({
+                        'epoch': candle['epoch'],
+                        'open': float(candle['open']),
+                        'high': float(candle['high']),
+                        'low': float(candle['low']),
+                        'close': float(candle['close'])
+                    })
+                return candles
+            elif 'error' in candles_data:
+                print(f"Error fetching historical candles: {candles_data['error']}")
+                return []
+            else:
+                print(f"Unexpected API response: {candles_data}")
+                return []
+
+    except (websockets.exceptions.ConnectionClosedError, Exception, RateLimitException) as e:
+        print(f"Error fetching historical candles: {e}")
+        return []
+
+async def subscribe_to_price(symbol="R_75"):
+    """Subscribes to real-time price stream (ticks) for a symbol."""
     if not API_KEY or not APP_ID:
         raise ValueError("API_KEY and APP_ID must be set.")
     uri = f"{DERIV_WEBSOCKET_URL}?app_id={APP_ID}"
@@ -94,28 +149,17 @@ async def subscribe_to_ticks(symbol="R_100"):
                 await call_api_per_minute(websocket, auth_request)
                 subscribe_request = json.dumps({"ticks": symbol, "subscribe": 1})
                 await call_api_per_second(websocket, subscribe_request)
-                print(f"Subscribed to tick stream for {symbol}")
+                print(f"Subscribed to price stream for {symbol}")
                 while True:
-                    response = await call_api_per_second(websocket,'')
+                    response = await call_api_per_second(websocket,'') #Pass empty string to maintain
                     tick_data = json.loads(response)
                     if 'tick' in tick_data and 'quote' in tick_data['tick']:
-                        yield int(str(tick_data['tick']['quote'])[-1])
+                        yield float(tick_data['tick']['quote'])  # Yield the full price
                     elif 'error' in tick_data:
                         print(f"Error in stream: {tick_data['error']}")
                         break
             reconnect_delay = 5
 
         except (websockets.exceptions.ConnectionClosedError, Exception, RateLimitException) as e:
-            print(f"Error in subscribe_to_ticks: {e}, reconnecting in {reconnect_delay}s")
-            await asyncio.sleep(reconnect_delay)
-            reconnect_delay = min(reconnect_delay * 2, 60)
-
-async def place_trade(trade_params):
-    """Placeholder for placing a trade."""
-    print("PLACEHOLDER: Placing trade...")
-    pass
-
-async def cancel_trade(trade_id):
-    """Placeholder for canceling a trade."""
-    print("PLACEHOLDER: Canceling trade...")
-    pass
+            print(f"Error in subscribe_to_price: {e}, reconnecting in {reconnect_delay}s")
+            await asyncio
