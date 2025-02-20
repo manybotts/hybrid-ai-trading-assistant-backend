@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+numpy
+tensorflow
+websockets
+ratelimit
+scikit-learn
+pandas
