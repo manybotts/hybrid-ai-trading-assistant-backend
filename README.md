@@ -1,5 +1,4 @@
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https%3A%2F%2Fgithub.com%2Fmanybotts%2Fhybrid-ai-trading-assistant-backend&envs=DERIVED_API_KEY%2CDERIVED_APP_ID%2CCALLS_PER_MINUTE%2CCALLS_PER_SECOND&DERIVED_API_KEY_DESCRIPTION=Your+Deriv.com+API+token&DERIVED_APP_ID_DESCRIPTION=Your+Deriv.com+App+ID&CALLS_PER_MINUTE_DESCRIPTION=Optional%3A+Override+default+calls+per+minute&CALLS_PER_SECOND_DESCRIPTION=Optional%3A+Override+default+calls+per+second)
-
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https%3A%2F%2Fgithub.com%2Fmanybotts%2Fhybrid-ai-trading-assistant-backend&envs=DERIVED_API_KEY%2CDERIVED_APP_ID%2CCALLS_PER_MINUTE%2CCALLS_PER_SECOND&DERIVED_API_KEY_DESCRIPTION=Your+Deriv.com+API+token&DERIVED_APP_ID_DESCRIPTION=Your+Deriv.com+App+ID&CALLS_PER_MINUTE_DESCRIPTION=Optional%3A+Override+default+calls+per+minute&CALLS_PER_SECOND_DESCRIPTION=Optional%3A+Override+default+calls+per+second&referral=main)
 This repository contains the backend (API server) for the Hybrid AI Trading Assistant project. It uses FastAPI and TensorFlow to provide predictions of the next digit in a financial time series from Deriv.com.
 
 ## Project Overview
